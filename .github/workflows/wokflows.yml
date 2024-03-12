@@ -38,7 +38,20 @@ jobs:
 
     - name: Terraform Validate
       uses: hashicorp/setup-terraform@v3
-
+    
+        # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      id: plan
+      if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+      run: |
+        terraform plan -no-color -input=false \
+        -out=TFplan.JSON
+      continue-on-error: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
     # - name: Terraform Apply
     #   uses: hashicorp/terraform-github-actions/apply@v0.4.0
     #   env:
@@ -68,14 +81,7 @@ jobs:
 #       id: validate
 #       run: terraform validate -no-color
 
-#     # Generates an execution plan for Terraform
-#     - name: Terraform Plan
-#       id: plan
-#       if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
-#       run: |
-#         terraform plan -no-color -input=false \
-#         -out=TFplan.JSON
-#       continue-on-error: true
+
 
 #     # - name: Terraform Apply
 #     #   if: github.ref == 'refs/heads/main'
